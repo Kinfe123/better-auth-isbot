@@ -13,9 +13,8 @@ import {
 
 export const IsBot = (
 ): BetterAuthPlugin => {
-
     return {
-        id: "event",
+        id: "is-bot",
         hooks: {
             after: [
                 {
@@ -25,7 +24,6 @@ export const IsBot = (
                             ctx.method === "GET");
                     },
                     handler: createAuthMiddleware(async (ctx) => {
-                        const session = await getSessionFromCtx(ctx);
                         if (isbot(ctx.headers["user-agent"])) {
                             throw new APIError("BAD_REQUEST", {
                                 message: 'BOT_DETECTED',
@@ -37,7 +35,7 @@ export const IsBot = (
             ],
         },
         $ERROR_CODES: {
-            BOT_DETECTED: "BOT_DETECTED",
+            BOT_DETECTED: "You are a bot",
         }
     } satisfies BetterAuthPlugin;
 };
