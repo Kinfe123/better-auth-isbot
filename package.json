@@ -1,6 +1,6 @@
 {
 	"name": "better-auth-is-bot",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "A better-auth plugin for bots protection.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
