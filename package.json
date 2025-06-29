@@ -1,7 +1,7 @@
 {
 	"name": "better-auth-is-bot",
 	"version": "1.0.0",
-	"description": "A better-auth plugin to detect and block bots.",
+	"description": "A better-auth plugin for bots protection.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"files": [
@@ -13,6 +13,9 @@
 		"dev": "unbuild --watch",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write . --unsafe",
+		"changeset": "changeset",
+		"version": "changeset version",
+		"release": "pnpm build && changeset publish",
 		"prepublishOnly": "pnpm build"
 	},
 	"keywords": [
@@ -34,6 +37,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.6",
+		"@changesets/cli": "^2.29.5",
 		"@types/better-sqlite3": "^7.6.13",
 		"better-sqlite3": "^12.2.0"
 	},
