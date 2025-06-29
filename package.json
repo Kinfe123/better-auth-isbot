@@ -1,6 +1,6 @@
 {
 	"name": "better-auth-is-bot",
-	"version": "1.0.3-beta.3",
+	"version": "1.0.3-beta.4",
 	"description": "A better-auth plugin for bots protection.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -40,8 +40,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.6",
 		"@types/better-sqlite3": "^7.6.13",
-		"better-sqlite3": "^12.2.0",
-		"bumpp": "^10.2.0"
+		"better-sqlite3": "^12.2.0"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
