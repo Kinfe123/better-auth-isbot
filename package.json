@@ -1,16 +1,26 @@
 {
 	"name": "better-auth-is-bot",
 	"version": "1.0.0",
-	"description": "",
+	"description": "A better-auth plugin to detect and block bots.",
 	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"test": "vitest",
 		"build": "unbuild",
 		"dev": "unbuild --watch",
 		"lint": "biome check .",
-		"lint:fix": "biome check --write . --unsafe"
+		"lint:fix": "biome check --write . --unsafe",
+		"prepublishOnly": "pnpm build"
 	},
-	"keywords": [],
+	"keywords": [
+		"better-auth",
+		"bots",
+		"security",
+		"auth"
+	],
 	"author": "",
 	"license": "MIT",
 	"packageManager": "pnpm@10.10.0",
