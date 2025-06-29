@@ -1,6 +1,6 @@
 {
 	"name": "better-auth-is-bot",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A better-auth plugin for bots protection.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -13,10 +13,11 @@
 		"dev": "unbuild --watch",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write . --unsafe",
-		"changeset": "changeset",
-		"version": "changeset version",
-		"release": "pnpm build && changeset publish",
-		"prepublishOnly": "pnpm build"
+		"prepublishOnly": "pnpm build",
+		"release": "pnpm build && bumpp && pnpm publish --access public --no-git-checks",
+		"release:no-build": "bumpp && pnpm publish --access public --no-git-checks --tag next",
+		"release:canary": "pnpm build && bumpp --preid canary --no-commit --no-tag --no-push && pnpm publish --access public --tag canary --no-git-checks",
+		"bump": "bumpp"
 	},
 	"keywords": [
 		"better-auth",
@@ -37,9 +38,9 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.6",
-		"@changesets/cli": "^2.29.5",
 		"@types/better-sqlite3": "^7.6.13",
-		"better-sqlite3": "^12.2.0"
+		"better-sqlite3": "^12.2.0",
+		"bumpp": "^10.2.0"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
