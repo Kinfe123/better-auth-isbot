@@ -30,7 +30,7 @@
 	"files": {
 		"ignore": [
 			"dist",
-			"build",
+			"build"
 		]
 	}
 }
