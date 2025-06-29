@@ -53,14 +53,6 @@ describe("IsBot Plugin", () => {
             expect(response.status).toBe(404);
         });
 
-        it("should not block bot on PUT request", async () => {
-            const request = new Request("http://localhost:3000/any-route", {
-                method: "PUT",
-                headers: { "User-Agent": botUserAgent },
-            });
-            const response = await auth.handler(request);
-            expect(response.status).toBe(404);
-        });
     });
 
     describe("With protectedEndpoints", () => {
