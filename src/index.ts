@@ -1,12 +1,14 @@
 import type { BetterAuthPlugin } from "better-auth";
 import { isbot } from "isbot";
+
 export interface IsBotOptions {
 	protectedEndpoints?: string[];
+	errorMessage?: string;
 }
 
 const escapeRegex = (str: string) => {
 	// eslint-disable-next-line no-useless-escape
-	return str.replace(/[-[\]/{}()+?.\\^$|]/g, "\\$&");
+	return str.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&");
 };
 
 const pathToRegexp = (path: string) => {
@@ -25,7 +27,7 @@ export const IsBot = (options: IsBotOptions = {}): BetterAuthPlugin => {
 				return;
 			}
 
-			const { protectedEndpoints } = options;
+			const { protectedEndpoints, errorMessage } = options;
 			const pathname = new URL(url).pathname;
 
 			if (protectedEndpoints && protectedEndpoints.length > 0) {
@@ -39,7 +41,7 @@ export const IsBot = (options: IsBotOptions = {}): BetterAuthPlugin => {
 			if (isbot(request.headers.get("user-agent") ?? "")) {
 				const response = new Response(
 					JSON.stringify({
-						message: "BOT_DETECTED",
+						message: errorMessage ?? "BOT_DETECTED",
 						error: "BAD_REQUEST",
 					}),
 					{

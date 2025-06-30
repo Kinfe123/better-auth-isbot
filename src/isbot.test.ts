@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { IsBotOptions } from "./index";
 import { IsBot } from "./index";
 
-function testUtils(options?: IsBotOptions) {
+function testUtils(options?: IsBotOptions ,) {
 	const auth = betterAuth({
 		baseURL: "http://localhost:3000",
 		database: new Database(":memory:"),
@@ -57,6 +57,39 @@ describe("IsBot Plugin", () => {
 	describe("With protectedEndpoints", () => {
 		const { auth } = testUtils({
 			protectedEndpoints: ["/auth/*", "/login", "/api/*"],
+		});
+
+		it("should block bot on a protected route", async () => {
+			const request = new Request("http://localhost:3000/login", {
+				method: "POST",
+				headers: { "User-Agent": botUserAgent },
+			});
+			const response = await auth.handler(request);
+			expect(response.status).toBe(400);
+		});
+
+		it("should block bot on a wildcard protected route", async () => {
+			const request = new Request("http://localhost:3000/api/auth/sign-in", {
+				method: "POST",
+				headers: { "User-Agent": botUserAgent },
+			});
+			const response = await auth.handler(request);
+			expect(response.status).toBe(400);
+		});
+
+		it("should allow bot on an unprotected route", async () => {
+			const request = new Request("http://localhost:3000/dashboard", {
+				method: "POST",
+				headers: { "User-Agent": botUserAgent },
+			});
+			const response = await auth.handler(request);
+			expect(response.status).toBe(404);
+		});
+	});
+    describe("With protectedEndpoints and custom error message", () => {
+		const { auth } = testUtils({
+			protectedEndpoints: ["/auth/*", "/login", "/api/*"],
+			errorMessage: "You are a bot",
 		});
 
 		it("should block bot on a protected route", async () => {
