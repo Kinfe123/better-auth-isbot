@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { IsBotOptions } from "./index";
 import { IsBot } from "./index";
 
-function testUtils(options?: IsBotOptions ,) {
+function testUtils(options?: IsBotOptions) {
 	const auth = betterAuth({
 		baseURL: "http://localhost:3000",
 		database: new Database(":memory:"),
@@ -86,7 +86,7 @@ describe("IsBot Plugin", () => {
 			expect(response.status).toBe(404);
 		});
 	});
-    describe("With protectedEndpoints and custom error message", () => {
+	describe("With protectedEndpoints and custom error message", () => {
 		const { auth } = testUtils({
 			protectedEndpoints: ["/auth/*", "/login", "/api/*"],
 			errorMessage: "You are a bot",
