@@ -16,7 +16,7 @@ const pathToRegexp = (path: string) => {
 	return new RegExp(`^${pattern}$`);
 };
 
-export const IsBot = (options: IsBotOptions = {}): BetterAuthPlugin => {
+export const IsBot = (options: IsBotOptions = {}) => {
 	return {
 		id: "is-bot",
 		onRequest: async (request) => {
