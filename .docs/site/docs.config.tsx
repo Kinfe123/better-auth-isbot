@@ -18,6 +18,14 @@ export default defineDocs({
           "slug": "troubleshooting"
         }
       ]
+    },
+    {
+      "slug": "reference",
+      "children": [
+        {
+          "slug": "exports"
+        }
+      ]
     }
   ],
   metadata: {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const title = "better-auth-is-bot";
-const description = "A better-auth plugin for bots protection.";
+const description = "Learn what better-auth-is-bot provides and where to start.";
 
 export default function HomePage() {
   return (

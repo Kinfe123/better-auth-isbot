@@ -1,0 +1,26 @@
+---
+title: "Reference"
+description: "Detailed reference material for the stable developer-facing surface of better-auth-is-bot."
+order: 50
+---
+
+# Reference
+
+The Reference section covers the public API of `better-auth-is-bot`: the exports you import, the options you pass, and the runtime contracts the plugin honours. Use these pages when you already have the plugin running and need to look up a specific type, option, or behaviour rather than follow a setup flow.
+
+## What is documented here
+
+`better-auth-is-bot` exposes two public symbols from `better-auth-is-bot`:
+
+- **`IsBot`** — the plugin factory function. Pass it to the `plugins` array in your `betterAuth` configuration. Accepts an optional `IsBotOptions` object.
+- **`IsBotOptions`** — the TypeScript interface that describes every configuration key the plugin accepts.
+
+Both are covered in detail on the [Public Exports](/docs/reference/exports) page, including the `protectedEndpoints` and `errorMessage` option contracts and the shape of the 400 response the plugin returns when it blocks a request.
+
+## Reference pages
+
+- [Public Exports](/docs/reference/exports) — Import paths, option definitions, and the runtime response format for `IsBot` and `IsBotOptions`.
+
+## Where to go next
+
+If you are still setting up the plugin, start with [Installation](/docs/installation) or the [Quickstart](/docs/quickstart). If something is not behaving as expected after setup, see [Troubleshooting](/docs/guides/troubleshooting).

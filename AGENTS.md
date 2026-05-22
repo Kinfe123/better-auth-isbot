@@ -11,6 +11,8 @@ Use this file as the handoff checklist for future edits to this documentation PR
 - /docs/quickstart - Quickstart
 - /docs/guides - Guides
 - /docs/guides/troubleshooting - Troubleshooting
+- /docs/reference - Reference
+- /docs/reference/exports - Public Exports
 ## Editing Guidelines
 - Prefer reader-facing setup, usage, and troubleshooting notes over source inventories.
 - Do not add commands, flags, environment variables, routes, imports, or framework names unless they are present in the repository.

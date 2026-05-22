@@ -1,40 +1,93 @@
 ---
 title: "Installation"
-description: "Install and configure better-auth-is-bot."
-order: 20
+description: "Install and configure better-auth-is-bot in your better-auth project."
 ---
 
 # Installation
 
-Install the project dependencies first, then run the command or package script that starts better-auth-is-bot locally.
+`better-auth-is-bot` is a plugin for [better-auth](https://github.com/better-auth/better-auth) that blocks bot traffic by inspecting the `User-Agent` header on incoming POST and GET requests. It has no required configuration — dropping it into the `plugins` array is enough to start protecting every route.
 
-## Install, configure, verify
-Installation has two jobs: install dependencies and verify the first local command.
+## Prerequisites
 
-## Runtime inputs
-- Dependencies provide the framework, CLI, adapters, and runtime libraries used by the project.
-- Library options are usually supplied by the host application when it imports and initializes the package.
-- Package scripts provide repeatable commands for local development, production builds, tests, and release tasks.
+Your project must already have `better-auth` installed and configured. `better-auth-is-bot` lists `better-auth ^1.2.10` as a peer dependency, so any compatible version in that range works.
 
-## Verify setup
-- Dependencies install with the package manager already used by the project.
-- The primary command starts, builds, or verifies the project without needing undocumented manual steps.
+## Add the package
 
-## Install Dependencies
-Run `pnpm install` from the project root.
+Choose the package manager your project uses:
 
-## Review Runtime Configuration
-Review the package options and runtime clients that callers pass in from their application.
+```bash
+npm install better-auth-is-bot
+# or
+pnpm add better-auth-is-bot
+# or
+yarn add better-auth-is-bot
+```
 
-No reader-facing environment contract was found in README or example environment files.
+## Register the plugin
 
-## Run the project
-Use `pnpm dev` as the first local command for this repository.
+Import `IsBot` and add it to the `plugins` array in your `betterAuth` configuration. No additional options are needed to get started:
 
-## Runtime coverage
-No framework-specific adapter or runtime files were found.
+```typescript
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
 
-## Repository scripts
-- `test`: `vitest` runs verification for expected behavior.
-- `build`: `unbuild` creates the production build or compiled package artifacts.
-- `dev`: `unbuild --watch` starts the local development servers or watchers.
+const auth = betterAuth({
+  // ... your other better-auth configuration
+  plugins: [
+    IsBot() // Protects all POST and GET routes by default
+  ],
+});
+```
+
+When a request arrives with a bot `User-Agent`, the plugin returns a `400 Bad Request` response immediately:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+## Configure protected routes and error messages
+
+`IsBot` accepts an optional `IsBotOptions` object with two fields:
+
+```typescript
+export interface IsBotOptions {
+  protectedEndpoints?: string[];
+  errorMessage?: string;
+}
+```
+
+`protectedEndpoints` limits bot-checking to a specific list of paths. Wildcard segments are supported. When this field is omitted, every POST and GET route is checked.
+
+`errorMessage` replaces the default `"BOT_DETECTED"` string in the response body.
+
+A fuller example combining both options:
+
+```typescript
+const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      protectedEndpoints: [
+        "/auth/*",
+        "/admin/*",
+        "/api/protected/*"
+      ],
+      errorMessage: "This endpoint does not allow automated requests. Please use a regular browser."
+    })
+  ],
+});
+```
+
+## Verify the setup
+
+With your auth server running, send a request that carries a known bot `User-Agent` (for example, `Googlebot/2.1`) to any protected route. The plugin should respond with `400` and the `BOT_DETECTED` message. A request from a normal browser `User-Agent` passes through unchanged.
+
+## Next steps
+
+- [Quickstart](/docs/quickstart) — see a complete first-run sequence with the plugin active.
+- [Public Exports](/docs/reference/exports) — full reference for `IsBot` and `IsBotOptions`.
+- [Troubleshooting](/docs/guides/troubleshooting) — recovery paths for common setup issues.

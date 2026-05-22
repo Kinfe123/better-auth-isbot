@@ -1,0 +1,67 @@
+---
+title: "Public Exports"
+description: "Reference for choosing the correct public import path for the workflow you are building."
+order: 60
+---
+
+# Public Exports
+
+`better-auth-is-bot` has a single public import path. Everything you need — the plugin function and its configuration type — comes from the root package name.
+
+## Import the plugin
+
+```ts
+import { IsBot, type IsBotOptions } from "better-auth-is-bot";
+```
+
+Both names are exported from the same module. Use `IsBot` to register the plugin with `betterAuth`, and `IsBotOptions` when you want to type a configuration object separately.
+
+## `IsBot`
+
+`IsBot` is a function that accepts an optional `IsBotOptions` object and returns a `BetterAuthPlugin`. Pass it directly into the `plugins` array of your `betterAuth` configuration.
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+const auth = betterAuth({
+  // ...
+  plugins: [
+    IsBot()
+  ],
+});
+```
+
+Called with no arguments, `IsBot` protects all `POST` and `GET` routes using the default settings.
+
+## `IsBotOptions`
+
+`IsBotOptions` is the TypeScript interface for the configuration object accepted by `IsBot`. Both fields are optional.
+
+```ts
+export interface IsBotOptions {
+  protectedEndpoints?: string[];
+  errorMessage?: string;
+}
+```
+
+**`protectedEndpoints`** — An array of route path strings to protect. When omitted, every `POST` and `GET` request is checked. Strings support `*` as a wildcard that matches any sequence of characters, so `/auth/*` covers every route under `/auth/`.
+
+**`errorMessage`** — The `message` value returned in the JSON body when a bot is blocked. Defaults to `"BOT_DETECTED"` when not set. The HTTP status is always `400` and the `error` field is always `"BAD_REQUEST"`.
+
+## Bot detection error response
+
+When a bot `User-Agent` is detected on a protected route, the plugin returns:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+`message` is replaced by your `errorMessage` value if you supply one.
+
+---
+
+Ready to put these to use? See the [Quickstart](/docs/quickstart) for a complete first-run sequence, or [Installation](/docs/installation) if you haven't added the package yet.

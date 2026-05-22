@@ -1,27 +1,70 @@
 ---
 title: "Troubleshooting"
-description: "Common setup and runtime issues are documented as clear recovery paths."
+description: "Common setup and runtime issues with better-auth-is-bot, with practical recovery steps."
 order: 40
 ---
 
 # Troubleshooting
 
-Troubleshooting turns known setup failures into clear recovery paths. It connects symptoms to likely causes, points at the files or settings to inspect, and gives safe verification steps.
+Most problems with `better-auth-is-bot` fall into one of three areas: the plugin not blocking bots when it should, the plugin blocking requests it should allow, or a misconfigured `errorMessage`. The sections below connect each symptom to its most likely cause.
 
-## Run the task
-1. Identify the failing step and the exact error message.
-2. Check the related config file, environment variable, adapter, or command flag.
-3. Run the smallest verification command before retrying the full workflow.
+## Bots are not being blocked
 
-## Check first
-- Install dependencies with `pnpm install`.
-- Confirm the local app or command with `pnpm dev`.
-- Review required configuration before running commands that create or mutate data.
+The plugin only inspects `POST` and `GET` requests. Requests using other HTTP methods pass through without any bot check. If you expect a different method to be blocked, that is by design — the plugin does not check those methods.
 
-## Commands
-- `dev`: `unbuild --watch` starts the local development servers or watchers.
-- `test`: `vitest` runs verification for expected behavior.
-- `build`: `unbuild` creates the production build or compiled package artifacts.
-- `lint:fix`: `biome check --write . --unsafe` checks or fixes code style before changes are shipped.
+When `protectedEndpoints` is not set, every `POST` and `GET` route is checked. If you have provided a `protectedEndpoints` array, confirm that the route the bot is hitting matches one of your patterns. Wildcards like `/auth/*` match any sub-path under `/auth/`, but the pattern must cover the exact path being requested.
 
-No CLI options were found for this command yet.
+Bot detection is based on the `User-Agent` header analyzed by the `isbot` library. If the bot is sending a `User-Agent` that `isbot` does not recognise as automated traffic, the request will pass through. There is no way to override the detection logic within this plugin; you would need to open an issue against the `isbot` package itself.
+
+## Legitimate requests are being blocked with a 400
+
+A `400 Bad Request` response means the plugin identified the `User-Agent` as a bot. Common causes:
+
+- A server-to-server integration or test client sending a `User-Agent` string that `isbot` classifies as automated (for example, generic HTTP library defaults like `axios/1.x` or `python-requests/2.x`).
+- A monitoring or uptime tool probing one of your protected routes.
+
+To exclude specific routes from bot checking, pass them to `protectedEndpoints` rather than leaving that option unset. When `protectedEndpoints` is provided, only the listed paths are checked, so any path not in the list passes through:
+
+```typescript
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+const auth = betterAuth({
+  plugins: [
+    IsBot({
+      protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"]
+    })
+  ],
+});
+```
+
+Routes not listed — including your server-to-server endpoints — will no longer be subject to bot detection.
+
+## Customising the error message seen by blocked clients
+
+When a bot is detected the plugin returns a `400` response. If you need the message in that response to say something specific, set `errorMessage`:
+
+```typescript
+IsBot({
+  errorMessage: "Access denied for automated requests."
+})
+```
+
+Without this option the plugin uses its own default message. The response is always `400 Bad Request`; only the message body changes.
+
+## Verifying the plugin is active
+
+Run the test suite to confirm the package is correctly wired up in your project:
+
+```bash
+pnpm test
+```
+
+`vitest` will run the plugin's tests against a local SQLite database. A passing run confirms the plugin loads and that bot detection behaves as expected.
+
+If you are iterating on configuration during development, `pnpm dev` runs `unbuild --watch` and rebuilds the package on every change, so you do not need to manually rebuild between edits.
+
+## Next steps
+
+- [Quickstart](/docs/quickstart) — see the minimal working configuration from scratch.
+- [Public Exports](/docs/reference/exports) — full reference for `IsBot` and `IsBotOptions`.

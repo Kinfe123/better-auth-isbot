@@ -1,28 +1,85 @@
 ---
 title: "Quickstart"
-description: "Run better-auth-is-bot with the current scripts and configuration."
-order: 10
+description: "Run better-auth-is-bot for the first time."
 ---
 
 # Quickstart
 
-Use this quickstart to move from a fresh checkout to a local run of better-auth-is-bot.
+`better-auth-is-bot` is a plugin for [better-auth](https://better-auth.com) that blocks bot traffic from your authentication routes. It inspects the `User-Agent` header on every incoming `POST` and `GET` request using the [`isbot`](https://www.npmjs.com/package/isbot) library. When a bot is detected, the plugin returns a `400 Bad Request` before the request reaches your auth handlers.
 
-## Prerequisites
-This project uses `pnpm` as its package manager.
-The repository does not publish a first-run environment checklist, so begin with the package scripts and add provider keys only when a workflow asks for them.
+## Install the package
 
-## Run locally
-1. Install dependencies with `pnpm install`.
-2. Run `pnpm dev` to start or verify the project locally.
+Add `better-auth-is-bot` to your project alongside `better-auth`:
 
-## Repository scripts
-These commands are useful after the first run because they cover the main local development, build, and verification tasks.
+```bash
+npm install better-auth-is-bot
+# or
+pnpm add better-auth-is-bot
+# or
+yarn add better-auth-is-bot
+```
 
-- `test`: `vitest` runs verification for expected behavior.
-- `build`: `unbuild` creates the production build or compiled package artifacts.
-- `dev`: `unbuild --watch` starts the local development servers or watchers.
+## Protect all routes with zero configuration
+
+Pass `IsBot()` into your `better-auth` plugins array. With no arguments, every `POST` and `GET` route handled by better-auth is protected automatically:
+
+```typescript
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot() // All POST and GET routes are protected
+  ],
+});
+```
+
+That is the entire setup. No additional environment variables or configuration files are required.
+
+## Protect specific routes only
+
+Pass a `protectedEndpoints` array to restrict bot-blocking to particular paths. Wildcard segments are supported:
+
+```typescript
+const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      protectedEndpoints: [
+        "/auth/*",
+        "/admin/*",
+        "/api/protected/*"
+      ],
+      errorMessage: "This endpoint does not allow automated requests. Please use a regular browser."
+    })
+  ],
+});
+```
+
+When `protectedEndpoints` is set, only paths that match one of the listed patterns are checked. All other routes pass through unchanged.
+
+## What happens when a bot is blocked
+
+Any request whose `User-Agent` matches a known bot pattern on a protected route receives this response:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+The `message` field uses `"BOT_DETECTED"` by default, or the string you supply as `errorMessage`. The HTTP status is always `400`. Requests that use methods other than `POST` and `GET` are never blocked regardless of route configuration.
+
+## What `isbot` detects
+
+The underlying `isbot` library covers search engine crawlers (Googlebot, Bingbot), social media bots (Facebook, Twitter), monitoring and testing tools, and many other automated user agents.
 
 ## Next steps
-- [Guides](/docs/guides) - Practical runbooks for common setup, development, and maintenance tasks.
-- [Troubleshooting](/docs/guides/troubleshooting) - Common setup and runtime issues are documented as clear recovery paths.
+
+- [Installation](/docs/installation) — prerequisites and full configuration reference
+- [Guides](/docs/guides) — runbooks for common setup and maintenance tasks
+- [Public Exports](/docs/reference/exports) — `IsBot` and `IsBotOptions` import reference
