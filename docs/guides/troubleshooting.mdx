@@ -1,0 +1,27 @@
+---
+title: "Troubleshooting"
+description: "Common setup and runtime issues are documented as clear recovery paths."
+order: 40
+---
+
+# Troubleshooting
+
+Troubleshooting turns known setup failures into clear recovery paths. It connects symptoms to likely causes, points at the files or settings to inspect, and gives safe verification steps.
+
+## Run the task
+1. Identify the failing step and the exact error message.
+2. Check the related config file, environment variable, adapter, or command flag.
+3. Run the smallest verification command before retrying the full workflow.
+
+## Check first
+- Install dependencies with `pnpm install`.
+- Confirm the local app or command with `pnpm dev`.
+- Review required configuration before running commands that create or mutate data.
+
+## Commands
+- `dev`: `unbuild --watch` starts the local development servers or watchers.
+- `test`: `vitest` runs verification for expected behavior.
+- `build`: `unbuild` creates the production build or compiled package artifacts.
+- `lint:fix`: `biome check --write . --unsafe` checks or fixes code style before changes are shipped.
+
+No CLI options were found for this command yet.

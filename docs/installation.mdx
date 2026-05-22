@@ -1,0 +1,40 @@
+---
+title: "Installation"
+description: "Install and configure better-auth-is-bot."
+order: 20
+---
+
+# Installation
+
+Install the project dependencies first, then run the command or package script that starts better-auth-is-bot locally.
+
+## Install, configure, verify
+Installation has two jobs: install dependencies and verify the first local command.
+
+## Runtime inputs
+- Dependencies provide the framework, CLI, adapters, and runtime libraries used by the project.
+- Library options are usually supplied by the host application when it imports and initializes the package.
+- Package scripts provide repeatable commands for local development, production builds, tests, and release tasks.
+
+## Verify setup
+- Dependencies install with the package manager already used by the project.
+- The primary command starts, builds, or verifies the project without needing undocumented manual steps.
+
+## Install Dependencies
+Run `pnpm install` from the project root.
+
+## Review Runtime Configuration
+Review the package options and runtime clients that callers pass in from their application.
+
+No reader-facing environment contract was found in README or example environment files.
+
+## Run the project
+Use `pnpm dev` as the first local command for this repository.
+
+## Runtime coverage
+No framework-specific adapter or runtime files were found.
+
+## Repository scripts
+- `test`: `vitest` runs verification for expected behavior.
+- `build`: `unbuild` creates the production build or compiled package artifacts.
+- `dev`: `unbuild --watch` starts the local development servers or watchers.
