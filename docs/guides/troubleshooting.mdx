@@ -1,7 +1,7 @@
 ---
 title: "Troubleshooting"
 description: "Common setup and runtime issues with better-auth-is-bot, with practical recovery steps."
-order: 40
+order: 50
 ---
 
 # Troubleshooting
@@ -14,7 +14,7 @@ The plugin only inspects `POST` and `GET` requests. Requests using other HTTP me
 
 When `protectedEndpoints` is not set, every `POST` and `GET` route is checked. If you have provided a `protectedEndpoints` array, confirm that the route the bot is hitting matches one of your patterns. Wildcards like `/auth/*` match any sub-path under `/auth/`, but the pattern must cover the exact path being requested.
 
-Bot detection is based on the `User-Agent` header analyzed by the `isbot` library. If the bot is sending a `User-Agent` that `isbot` does not recognise as automated traffic, the request will pass through. There is no way to override the detection logic within this plugin; you would need to open an issue against the `isbot` package itself.
+Bot detection is based on the `User-Agent` header analyzed by the `isbot` library. If the bot is sending a `User-Agent` that `isbot` does not recognise as automated traffic, the request passes through. There is no way to override the detection logic within this plugin; you would need to open an issue against the `isbot` package itself.
 
 ## Legitimate requests are being blocked with a 400
 
@@ -23,24 +23,9 @@ A `400 Bad Request` response means the plugin identified the `User-Agent` as a b
 - A server-to-server integration or test client sending a `User-Agent` string that `isbot` classifies as automated (for example, generic HTTP library defaults like `axios/1.x` or `python-requests/2.x`).
 - A monitoring or uptime tool probing one of your protected routes.
 
-To exclude specific routes from bot checking, pass them to `protectedEndpoints` rather than leaving that option unset. When `protectedEndpoints` is provided, only the listed paths are checked, so any path not in the list passes through:
+To exclude specific routes from bot checking, pass them to `protectedEndpoints` rather than leaving that option unset. When `protectedEndpoints` is provided, only the listed paths are checked — everything else passes through untouched.
 
-```typescript
-import { betterAuth } from "better-auth";
-import { IsBot } from "better-auth-is-bot";
-
-const auth = betterAuth({
-  plugins: [
-    IsBot({
-      protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"]
-    })
-  ],
-});
-```
-
-Routes not listed — including your server-to-server endpoints — will no longer be subject to bot detection.
-
-## Customising the error message seen by blocked clients
+## Customising the error message
 
 When a bot is detected the plugin returns a `400` response. If you need the message in that response to say something specific, set `errorMessage`:
 
@@ -67,4 +52,4 @@ If you are iterating on configuration during development, `pnpm dev` runs `unbui
 ## Next steps
 
 - [Quickstart](/docs/quickstart) — see the minimal working configuration from scratch.
-- [Public Exports](/docs/reference/exports) — full reference for `IsBot` and `IsBotOptions`.
+- [Guides](/docs/guides) — overview of all practical runbooks for better-auth-is-bot.

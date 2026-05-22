@@ -5,11 +5,11 @@ description: "Install and configure better-auth-is-bot in your better-auth proje
 
 # Installation
 
-`better-auth-is-bot` is a plugin for [better-auth](https://github.com/better-auth/better-auth) that blocks bot traffic by inspecting the `User-Agent` header on incoming POST and GET requests. It has no required configuration — dropping it into the `plugins` array is enough to start protecting every route.
+`better-auth-is-bot` is a plugin for `better-auth` that blocks bot traffic by inspecting the `User-Agent` header on incoming POST and GET requests. It has no required configuration — dropping it into the `plugins` array is enough to start protecting every route.
 
 ## Prerequisites
 
-Your project must already have `better-auth` installed and configured. `better-auth-is-bot` lists `better-auth ^1.2.10` as a peer dependency, so any compatible version in that range works.
+Your project must already have `better-auth` installed and configured. `better-auth-is-bot` declares `better-auth ^1.2.10` as a dependency, so any compatible version in that range works.
 
 ## Add the package
 
@@ -25,7 +25,7 @@ yarn add better-auth-is-bot
 
 ## Register the plugin
 
-Import `IsBot` and add it to the `plugins` array in your `betterAuth` configuration. No additional options are needed to get started:
+Import `IsBot` from `better-auth-is-bot` and add it to the `plugins` array in your `betterAuth` configuration. No additional options are needed to get started:
 
 ```typescript
 import { betterAuth } from "better-auth";
@@ -39,7 +39,7 @@ const auth = betterAuth({
 });
 ```
 
-When a request arrives with a bot `User-Agent`, the plugin returns a `400 Bad Request` response immediately:
+When a request arrives with a bot `User-Agent`, the plugin immediately returns a `400 Bad Request` response and the request never reaches your handler:
 
 ```json
 {
@@ -59,11 +59,11 @@ export interface IsBotOptions {
 }
 ```
 
-`protectedEndpoints` limits bot-checking to a specific list of paths. Wildcard segments are supported. When this field is omitted, every POST and GET route is checked.
+`protectedEndpoints` limits bot-checking to a specific list of paths. Wildcard segments are supported — for example, `/auth/*` matches any sub-path under `/auth/`. When this field is omitted, every POST and GET route is checked.
 
-`errorMessage` replaces the default `"BOT_DETECTED"` string in the response body.
+`errorMessage` replaces the default `"BOT_DETECTED"` string in the response body. Use it to return a human-readable explanation to any client inspecting the response.
 
-A fuller example combining both options:
+A complete example combining both options:
 
 ```typescript
 const auth = betterAuth({
@@ -84,10 +84,11 @@ const auth = betterAuth({
 
 ## Verify the setup
 
-With your auth server running, send a request that carries a known bot `User-Agent` (for example, `Googlebot/2.1`) to any protected route. The plugin should respond with `400` and the `BOT_DETECTED` message. A request from a normal browser `User-Agent` passes through unchanged.
+With your auth server running, send a request that carries a known bot `User-Agent` — for example, `Googlebot/2.1` — to any protected route. The plugin should respond with `400` and the `BOT_DETECTED` message. A request from a normal browser `User-Agent` passes through unchanged.
+
+Only POST and GET requests are evaluated. Requests using any other HTTP method pass through without any bot check, regardless of the `User-Agent`.
 
 ## Next steps
 
-- [Quickstart](/docs/quickstart) — see a complete first-run sequence with the plugin active.
-- [Public Exports](/docs/reference/exports) — full reference for `IsBot` and `IsBotOptions`.
-- [Troubleshooting](/docs/guides/troubleshooting) — recovery paths for common setup issues.
+- [Quickstart](/docs/quickstart) — a complete first-run sequence with the plugin active.
+- [Troubleshooting](/docs/guides/troubleshooting) — recovery steps for common setup and runtime issues.

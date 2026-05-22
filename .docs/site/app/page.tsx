@@ -20,13 +20,9 @@ export default function HomePage() {
           Author markdown in{" "}
           <code className="rounded-md border border-fd-border bg-fd-muted/60 px-1.5 py-0.5 font-mono text-[0.9em] text-fd-foreground">
             docs/
-          </code>{" "}
-          and{" "}
-          <code className="rounded-md border border-fd-border bg-fd-muted/60 px-1.5 py-0.5 font-mono text-[0.9em] text-fd-foreground">
-            api-reference/
           </code>
           . Everything under{" "}
-          <span className="font-mono text-[0.95em] text-fd-foreground">/docs</span> is synced from those folders.
+          <span className="font-mono text-[0.95em] text-fd-foreground">/docs</span> is synced from that folder.
         </p>
         <div className="mt-10">
           <Link

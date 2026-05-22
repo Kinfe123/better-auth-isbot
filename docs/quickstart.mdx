@@ -5,11 +5,11 @@ description: "Run better-auth-is-bot for the first time."
 
 # Quickstart
 
-`better-auth-is-bot` is a plugin for [better-auth](https://better-auth.com) that blocks bot traffic from your authentication routes. It inspects the `User-Agent` header on every incoming `POST` and `GET` request using the [`isbot`](https://www.npmjs.com/package/isbot) library. When a bot is detected, the plugin returns a `400 Bad Request` before the request reaches your auth handlers.
+`better-auth-is-bot` blocks bot traffic from your better-auth routes by inspecting the `User-Agent` header on every incoming `POST` and `GET` request. When the [`isbot`](https://www.npmjs.com/package/isbot) library recognises the user agent as a bot, the plugin returns a `400 Bad Request` before the request reaches any of your auth handlers. No other HTTP methods are evaluated — they pass through untouched.
 
-## Install the package
+## Add the package
 
-Add `better-auth-is-bot` to your project alongside `better-auth`:
+Install `better-auth-is-bot` alongside your existing `better-auth` setup:
 
 ```bash
 npm install better-auth-is-bot
@@ -19,9 +19,11 @@ pnpm add better-auth-is-bot
 yarn add better-auth-is-bot
 ```
 
+`better-auth ^1.2.10` must already be installed. No other prerequisites are required.
+
 ## Protect all routes with zero configuration
 
-Pass `IsBot()` into your `better-auth` plugins array. With no arguments, every `POST` and `GET` route handled by better-auth is protected automatically:
+Import `IsBot` and pass it into the `plugins` array of your `betterAuth` configuration. Called with no arguments, it protects every `POST` and `GET` route automatically:
 
 ```typescript
 import { betterAuth } from "better-auth";
@@ -36,11 +38,11 @@ const auth = betterAuth({
 });
 ```
 
-That is the entire setup. No additional environment variables or configuration files are required.
+That is the complete setup. No environment variables or additional configuration files are needed.
 
 ## Protect specific routes only
 
-Pass a `protectedEndpoints` array to restrict bot-blocking to particular paths. Wildcard segments are supported:
+Pass a `protectedEndpoints` array to limit bot-blocking to particular paths. Wildcard segments cover entire route groups:
 
 ```typescript
 const auth = betterAuth({
@@ -48,22 +50,29 @@ const auth = betterAuth({
   database: /* your database config */,
   plugins: [
     IsBot({
-      protectedEndpoints: [
-        "/auth/*",
-        "/admin/*",
-        "/api/protected/*"
-      ],
-      errorMessage: "This endpoint does not allow automated requests. Please use a regular browser."
+      protectedEndpoints: ["/login", "/register", "/api/auth/*"]
     })
   ],
 });
 ```
 
-When `protectedEndpoints` is set, only paths that match one of the listed patterns are checked. All other routes pass through unchanged.
+When `protectedEndpoints` is set, only paths that match one of the listed patterns are checked. Every other route passes through unchanged.
 
-## What happens when a bot is blocked
+## Customize the blocked-bot response
 
-Any request whose `User-Agent` matches a known bot pattern on a protected route receives this response:
+Supply an `errorMessage` string to replace the default message bots receive:
+
+```typescript
+const auth = betterAuth({
+  plugins: [
+    IsBot({
+      errorMessage: "Access denied for automated requests."
+    })
+  ],
+});
+```
+
+When a bot is blocked, the plugin always returns HTTP `400` with this JSON body shape — using your custom string in place of the default:
 
 ```json
 {
@@ -72,14 +81,11 @@ Any request whose `User-Agent` matches a known bot pattern on a protected route 
 }
 ```
 
-The `message` field uses `"BOT_DETECTED"` by default, or the string you supply as `errorMessage`. The HTTP status is always `400`. Requests that use methods other than `POST` and `GET` are never blocked regardless of route configuration.
+## What gets detected
 
-## What `isbot` detects
-
-The underlying `isbot` library covers search engine crawlers (Googlebot, Bingbot), social media bots (Facebook, Twitter), monitoring and testing tools, and many other automated user agents.
+The `isbot` library recognises search engine crawlers (Googlebot, Bingbot), social media bots (Facebook, Twitter), monitoring and testing tools, and many other automated user agents. Requests that arrive without a bot user agent on a protected route are passed through normally.
 
 ## Next steps
 
-- [Installation](/docs/installation) — prerequisites and full configuration reference
-- [Guides](/docs/guides) — runbooks for common setup and maintenance tasks
-- [Public Exports](/docs/reference/exports) — `IsBot` and `IsBotOptions` import reference
+- [Installation](/docs/installation) — prerequisites, full configuration options, and the `IsBotOptions` type reference
+- [Guides](/docs/guides) — runbooks for tuning route protection and diagnosing unexpected behavior

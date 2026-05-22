@@ -8,15 +8,13 @@ order: 30
 
 After the initial setup, most day-to-day work with `better-auth-is-bot` involves tuning how the plugin behaves in your environment: adjusting which routes are protected, customizing the error response bots receive, and diagnosing why a request is being blocked or allowed unexpectedly.
 
-The guides in this section cover those tasks with concrete examples drawn from the plugin's documented behavior. Each guide focuses on a specific outcome rather than restating the configuration reference.
-
 ## How the plugin handles requests
 
 Understanding the order of operations helps you reason about most runtime questions without additional tooling. When a request arrives at your better-auth instance, the plugin applies these steps in sequence:
 
 1. **Request filtering** — only `POST` and `GET` requests are checked; all other HTTP methods pass through without inspection.
 2. **Route matching** — if `protectedEndpoints` is set, the request path is compared against those patterns (wildcards are supported). If no list is provided, all routes are treated as protected.
-3. **Bot detection** — the `User-Agent` header is analyzed using the [`isbot`](https://www.npmjs.com/package/isbot) library.
+3. **Bot detection** — the `User-Agent` header is analyzed using the `isbot` library.
 4. **Response** — a detected bot on a protected route receives a `400 Bad Request` response.
 
 Keeping this sequence in mind is usually enough to trace why a particular request is being blocked or allowed.
@@ -38,10 +36,10 @@ const auth = betterAuth({
 });
 ```
 
-The `errorMessage` value is returned inside the JSON body of the `400` response that blocked bots receive.
+The `errorMessage` value appears inside the JSON body of the `400` response that blocked bots receive.
 
 ## In this section
 
 - [Troubleshooting](/docs/guides/troubleshooting) — common setup and runtime issues with clear recovery steps.
 
-For the full list of configuration options accepted by `IsBot`, see the [Public Exports](/docs/reference/exports) reference. If you have not yet added the plugin to your project, start with [Installation](/docs/installation).
+If you have not yet added the plugin to your project, start with [Installation](/docs/installation).
