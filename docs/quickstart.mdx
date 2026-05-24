@@ -1,0 +1,78 @@
+---
+title: "Quickstart"
+description: "Run better-auth-is-bot for the first time."
+order: 20
+---
+
+# Quickstart
+
+This guide gets `better-auth-is-bot` running inside a better-auth project in under five minutes. By the end, your auth server will reject bot requests with a `400` response and let real users through untouched.
+
+## 1. Install the package
+
+```bash
+pnpm add better-auth-is-bot
+```
+
+## 2. Register the plugin
+
+Add `IsBot` to your better-auth configuration. Calling it with no arguments is enough to protect every `POST` and `GET` route:
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot()
+  ],
+});
+```
+
+## 3. Protect only specific routes (optional)
+
+If you want to limit protection to your authentication endpoints rather than every route, pass a `protectedEndpoints` array. Wildcard patterns are supported:
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"],
+      errorMessage: "Automated requests are not allowed."
+    })
+  ],
+});
+```
+
+## 4. Start your server and test
+
+Start your server normally, then send a request with a bot `User-Agent`:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/sign-in \
+  -H "User-Agent: Googlebot/2.1 (+http://www.google.com/bot.html)" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret"}'
+```
+
+The plugin returns a `400` response immediately:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+Requests from regular browsers pass through without any interference.
+
+## Next steps
+
+Read the [Guides](/docs/guides) to explore wildcard route patterns, custom error messages, and common troubleshooting scenarios.
