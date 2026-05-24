@@ -1,0 +1,72 @@
+---
+title: "Guides"
+description: "Practical runbooks for common setup, development, and maintenance tasks."
+---
+
+# Guides
+
+These guides walk through the practical workflows you'll reach for after the initial setup. Each one focuses on a single goal and shows you exactly what to configure.
+
+## Protecting specific routes
+
+By default, `IsBot()` inspects every `POST` and `GET` request that passes through better-auth. If you only want to protect a subset of routes — your sign-in page, for example, but not your public API — pass a `protectedEndpoints` array:
+
+```ts
+IsBot({
+  protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"],
+})
+```
+
+Only requests whose path exactly matches one of those strings (or matches a wildcard pattern) will be checked for bot `User-Agent` strings. All other routes are left untouched.
+
+## Using wildcard patterns
+
+Wildcard patterns let you protect entire route groups with a single entry. The `*` character matches any path segment after the prefix:
+
+```ts
+IsBot({
+  protectedEndpoints: [
+    "/auth/*",         // covers /auth/login, /auth/register, etc.
+    "/admin/*",        // covers all admin routes
+    "/api/private/*",  // covers private API routes
+  ],
+})
+```
+
+This is the recommended approach when your auth routes share a common prefix.
+
+## Customizing the error message
+
+When a bot is blocked, the plugin returns a `400 Bad Request` with `"BOT_DETECTED"` as the default message. You can replace that with any string:
+
+```ts
+IsBot({
+  errorMessage: "This endpoint does not allow automated requests. Please use a regular browser.",
+})
+```
+
+The full response shape is always:
+
+```json
+{
+  "message": "<your message or BOT_DETECTED>",
+  "error": "BAD_REQUEST"
+}
+```
+
+## Combining options
+
+Both options can be used together. This configuration protects three route groups and returns a human-readable error message:
+
+```ts
+IsBot({
+  protectedEndpoints: [
+    "/auth/*",
+    "/admin/*",
+    "/api/protected/*",
+  ],
+  errorMessage: "This endpoint does not allow automated requests. Please use a regular browser.",
+})
+```
+
+For common issues and how to resolve them, see [Troubleshooting](/docs/guides/troubleshooting).

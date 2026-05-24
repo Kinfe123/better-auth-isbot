@@ -1,0 +1,82 @@
+---
+title: "Installation"
+description: "Install and configure better-auth-is-bot."
+---
+
+# Installation
+
+This page walks you through adding `better-auth-is-bot` to an existing [better-auth](https://better-auth.com) project.
+
+## Prerequisites
+
+You need an existing project that already has `better-auth` installed and configured. The plugin wraps better-auth's plugin system, so it does not replace any part of your existing setup.
+
+## Install the package
+
+Pick your package manager and run one of the following:
+
+```bash
+npm install better-auth-is-bot
+```
+
+```bash
+pnpm add better-auth-is-bot
+```
+
+```bash
+yarn add better-auth-is-bot
+```
+
+## Add the plugin
+
+Import `IsBot` from `better-auth-is-bot` and add it to the `plugins` array in your `betterAuth` configuration:
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  // ... your existing better-auth configuration
+  plugins: [
+    IsBot(),
+  ],
+});
+```
+
+That's all that's required. With no options passed, the plugin protects every `POST` and `GET` route handled by better-auth.
+
+## Configuration options
+
+`IsBot` accepts an optional `IsBotOptions` object:
+
+```ts
+export interface IsBotOptions {
+  protectedEndpoints?: string[];
+  errorMessage?: string;
+}
+```
+
+- `protectedEndpoints` — An array of path strings to protect. If omitted, all `POST` and `GET` routes are checked. Wildcard patterns such as `"/auth/*"` are supported.
+- `errorMessage` — The message string returned to blocked bots. Defaults to `"BOT_DETECTED"`.
+
+## Verify it is working
+
+Start your application and send a request with a known bot `User-Agent`. For example, using `curl`:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/sign-in \
+  -H "User-Agent: Googlebot/2.1 (+http://www.google.com/bot.html)" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret"}'
+```
+
+You should receive a `400` response:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+Once you see that response, the plugin is active and working correctly. Head to [Quickstart](/docs/quickstart) to see a full working configuration, or [Guides](/docs/guides) for more advanced patterns.

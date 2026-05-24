@@ -1,0 +1,71 @@
+---
+title: "Quickstart"
+description: "Run better-auth-is-bot for the first time."
+---
+
+# Quickstart
+
+This page gets you from install to a working bot-protected auth setup in under five minutes. You'll add the `IsBot` plugin to a better-auth instance and confirm it blocks automated requests.
+
+## 1. Install the package
+
+```bash
+pnpm add better-auth-is-bot
+```
+
+## 2. Add the plugin to your auth config
+
+Open the file where you call `betterAuth` and add `IsBot` to the `plugins` array:
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot(), // protects all POST and GET routes by default
+  ],
+});
+```
+
+That single line is enough. No environment variables or additional configuration are required.
+
+## 3. Test the protection
+
+Send a request using a bot `User-Agent` to any of your auth routes:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/sign-in \
+  -H "User-Agent: Googlebot/2.1 (+http://www.google.com/bot.html)" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret"}'
+```
+
+The plugin returns a `400 Bad Request`:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+A regular browser request with a standard `User-Agent` passes through unchanged.
+
+## 4. Scope protection to specific routes (optional)
+
+If you want to protect only certain paths instead of every route, pass a `protectedEndpoints` array:
+
+```ts
+IsBot({
+  protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"],
+})
+```
+
+Wildcard patterns work too — `"/auth/*"` matches `/auth/login`, `/auth/register`, and any other path under `/auth/`.
+
+## Next steps
+
+To customize the error message bots receive, or to use wildcard patterns across multiple route groups, see the [Guides](/docs/guides) section. If something isn't behaving as expected, [Troubleshooting](/docs/guides/troubleshooting) covers the most common issues.

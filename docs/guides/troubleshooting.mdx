@@ -1,0 +1,62 @@
+---
+title: "Troubleshooting"
+description: "Common setup and runtime issues are documented as clear recovery paths."
+---
+
+# Troubleshooting
+
+This page covers the issues you're most likely to run into when setting up or running `better-auth-is-bot`, along with concrete steps to resolve each one.
+
+## Legitimate users are being blocked
+
+The most common cause is a custom `User-Agent` set by your frontend framework, a reverse proxy, or a testing tool that happens to look like a bot to the `isbot` library.
+
+Check what `User-Agent` your client is actually sending:
+
+```bash
+curl -v -X POST http://localhost:3000/api/auth/sign-in \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"secret"}'
+```
+
+If the `User-Agent` header is absent or matches a known bot signature, update your client to send a standard browser `User-Agent`, or scope the plugin to only the specific routes that need protection using `protectedEndpoints` so the affected route is excluded.
+
+## Bot requests are not being blocked
+
+First, confirm the plugin is actually registered. In your auth config, `IsBot()` must appear inside the `plugins` array:
+
+```ts
+export const auth = betterAuth({
+  plugins: [
+    IsBot(), // must be here
+  ],
+});
+```
+
+Next, check the HTTP method. The plugin only inspects `POST` and `GET` requests. If you're testing with `PUT`, `PATCH`, or `DELETE`, those requests pass through regardless of the `User-Agent`.
+
+Finally, if you're using `protectedEndpoints`, make sure the path you're testing matches one of the listed patterns exactly, including any leading slash.
+
+## The plugin blocks requests on routes I excluded
+
+If you passed a `protectedEndpoints` list but requests on unlisted routes are still being blocked, verify there are no wildcard patterns that accidentally cover those routes. For example, `"/api/*"` matches `/api/public/status` as well as `/api/private/data`. Narrow your patterns to avoid unintended matches.
+
+## Custom error message is not appearing
+
+Make sure you're passing `errorMessage` as a string inside the options object, not as a top-level argument:
+
+```ts
+// ✅ correct
+IsBot({ errorMessage: "Access denied." })
+
+// ❌ incorrect — IsBot does not accept a bare string
+IsBot("Access denied.")
+```
+
+If the response still shows `"BOT_DETECTED"`, confirm your build includes the latest version of the file where you changed the configuration — some frameworks cache module bundles aggressively during development.
+
+## Build errors after installing
+
+The package ships pre-built CommonJS and ESM outputs. If your TypeScript project reports missing types, check that your `tsconfig.json` includes `"moduleResolution": "bundler"` or `"node16"`. The package exports both types and runtime code from the same .
+
+> **Note:** If you're still stuck, open an issue on the repository. Contributions and bug reports are welcome.

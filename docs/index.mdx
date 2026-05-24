@@ -1,0 +1,12 @@
+---
+title: "better-auth-is-bot"
+description: "A better-auth plugin to detect and block bots from accessing your application routes."
+---
+
+# better-auth-is-bot
+
+`better-auth-is-bot` is a [better-auth](https://better-auth.com) plugin that stops bots before they reach your auth routes. It inspects the `User-Agent` header on every incoming `POST` and `GET` request using the battle-tested [`isbot`](https://www.npmjs.com/package/isbot) library and returns a `400 Bad Request` response whenever an automated client is detected.
+
+The plugin works with zero configuration — drop `IsBot()` into your `plugins` array and every POST and GET route is protected immediately. When you need finer control, you can scope protection to specific paths or entire route groups using wildcard patterns, and you can override the default error message with your own copy.
+
+If you're ready to add it to your project, head to [Installation](/docs/installation) for setup steps, or jump straight to [Quickstart](/docs/quickstart) for a copy-pasteable working example. The [Guides](/docs/guides) section covers route filtering, wildcard patterns, custom error messages, and troubleshooting.
