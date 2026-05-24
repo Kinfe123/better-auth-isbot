@@ -1,0 +1,53 @@
+---
+title: "Guides"
+description: "Practical runbooks for common setup, development, and maintenance tasks."
+order: 0
+---
+
+# Guides
+
+These guides take you beyond the defaults and cover the practical configuration decisions you'll face after a first install.
+
+**[Troubleshooting](/docs/guides/troubleshooting)** — Work through common issues like bots passing through undetected, legitimate users being blocked, or the plugin appearing to have no effect.
+
+If you haven't installed the plugin yet, start at [Installation](/docs/installation) or jump straight to the [Quickstart](/docs/quickstart) for a working example.
+
+## Examples
+
+Use these examples as concrete starting points for this workflow:
+
+### Basic Usage
+```typescript
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+const auth = betterAuth({
+  // ... your other better-auth configuration
+  plugins: [
+    IsBot() // Protects all POST and GET routes by default
+  ],
+});
+```
+
+### Protect All Routes (Default Behavior)
+```typescript
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot() // All POST and GET routes are protected
+  ],
+});
+```
+
+### Installation
+```bash
+npm install better-auth-is-bot
+# or
+pnpm add better-auth-is-bot
+# or
+yarn add better-auth-is-bot
+```

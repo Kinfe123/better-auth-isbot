@@ -1,0 +1,82 @@
+---
+title: "Troubleshooting"
+description: "Common setup and runtime issues are documented as clear recovery paths."
+order: 1
+---
+
+# Troubleshooting
+
+This page covers the most common issues you might run into after adding `better-auth-is-bot` to your project, and how to resolve them.
+
+## Bots are not being blocked
+
+If bot requests are reaching your handlers without being rejected, check these things in order.
+
+**Confirm the plugin is registered.** The `IsBot()` call must appear inside the `plugins` array passed to `betterAuth(...)`. A common mistake is importing the function but never calling it, or placing it outside `plugins`:
+
+```ts
+// ✅ Correct
+plugins: [IsBot()]
+
+// ❌ Wrong — plugin is not called
+plugins: [IsBot]
+```
+
+**Check the request method.** The plugin only inspects `POST` and `GET` requests. Requests using `PUT`, `PATCH`, `DELETE`, or other methods pass through regardless of the `User-Agent`.
+
+**Verify your `protectedEndpoints` patterns.** If you've set `protectedEndpoints`, only those paths are checked. A request to `/api/auth/sign-out` will not be blocked if your list only includes `/sign-in`. Use a wildcard to cover a whole prefix:
+
+```ts
+IsBot({
+  protectedEndpoints: ["/api/auth/*"]
+})
+```
+
+**Test with a known bot User-Agent.** Some HTTP clients send realistic browser User-Agents. Use a string that `isbot` will definitively flag, such as `Googlebot/2.1 (+http://www.google.com/bot.html)`, to confirm the plugin itself is working:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/sign-in \
+  -H "User-Agent: Googlebot/2.1 (+http://www.google.com/bot.html)" \
+  -H "Content-Type: application/json"
+```
+
+If this returns a `400`, the plugin is active. If it doesn't, revisit your registration.
+
+## Legitimate users are being blocked
+
+The underlying `isbot` library is conservative and well-maintained, but unusual browser configurations or custom HTTP clients can produce User-Agent strings that resemble bots. If a real user reports being blocked, inspect the `User-Agent` header in your server logs to identify the string being flagged.
+
+If you need to allow specific automated tools — for example, an internal health-check service — consider using `protectedEndpoints` to limit the plugin to only the routes that genuinely need bot protection, rather than applying it globally:
+
+```ts
+IsBot({
+  protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"]
+})
+```
+
+This keeps your public or monitoring endpoints accessible while protecting the routes that matter most.
+
+## The error response format doesn't match your API
+
+By default the plugin responds with:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+You can change the `message` value with the `errorMessage` option:
+
+```ts
+IsBot({
+  errorMessage: "Automated requests are not permitted on this endpoint."
+})
+```
+
+Note that the HTTP status code is always `400 Bad Request` and the `error` field is always `"BAD_REQUEST"`. Only `message` is customizable.
+
+## Next steps
+
+If you're still seeing unexpected behavior after working through these steps, check the [`isbot` documentation](https://www.npmjs.com/package/isbot) to understand exactly which User-Agent strings are detected, or open an issue in the `better-auth-is-bot` repository.
