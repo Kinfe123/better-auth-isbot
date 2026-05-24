@@ -1,0 +1,63 @@
+---
+title: "Troubleshooting"
+description: "Common setup and runtime issues are documented as clear recovery paths."
+---
+
+# Troubleshooting
+
+This page covers the issues you're most likely to encounter when setting up or running `better-auth-is-bot`, along with clear steps to resolve them.
+
+## Bots are not being blocked
+
+If automated requests are getting through without receiving a `400` response, work through these checks in order.
+
+**1. Confirm the plugin is registered.** The plugin must appear in the `plugins` array of your `betterAuth(...)` call. A common mistake is defining the auth instance in one file and importing a different, unconfigured instance elsewhere.
+
+```ts
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  plugins: [
+    IsBot() // must be here
+  ],
+});
+```
+
+**2. Check the HTTP method.** The plugin only inspects `POST` and `GET` requests. If your route uses a different method, the request passes through by design.
+
+**3. Verify the `User-Agent` header is present.** If the request does not include a `User-Agent` header, `isbot` cannot identify it as a bot. Some custom test clients omit this header by default.
+
+**4. Check `protectedEndpoints` if you set it.** When `protectedEndpoints` is configured, only requests whose paths match one of the listed patterns are checked. Confirm the path you're testing matches a pattern exactly, including the leading slash.
+
+```ts
+// "/login" does NOT match "/auth/*" — add it explicitly if needed
+protectedEndpoints: ["/auth/*", "/login"]
+```
+
+## Legitimate users are being blocked
+
+If real users report `400 BOT_DETECTED` errors, the most likely cause is a browser extension, proxy, or automated testing tool setting a `User-Agent` string that `isbot` classifies as a bot.
+
+To diagnose it, log the `User-Agent` header on blocked requests and run the value through the `isbot` package manually:
+
+```ts
+import { isbot } from "isbot";
+
+console.log(isbot("<the user-agent string here>"));
+```
+
+If `isbot` returns `true` for a `User-Agent` that belongs to a real user, you'll need to scope the plugin to specific routes using `protectedEndpoints` rather than checking all traffic, so the affected path is excluded.
+
+## The error message is not updating
+
+After changing `errorMessage`, make sure you restart your development server. If you're using a build step, run the build again — the configuration is evaluated at startup, not at request time.
+
+## TypeScript cannot find `IsBot` or `IsBotOptions`
+
+Confirm the package is installed and your `tsconfig.json` includes `moduleResolution` set to `bundler`, `node16`, or `nodenext`. The package ships both ESM and CJS outputs with TypeScript declarations included.
+
+```bash
+pnpm add better-auth-is-bot
+```
+
+> **Note:** If you installed from a local path during development, run `pnpm install` again to ensure the resolved package points to the published version.

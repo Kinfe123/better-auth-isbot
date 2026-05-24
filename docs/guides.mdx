@@ -1,0 +1,85 @@
+---
+title: "Guides"
+description: "Practical runbooks for common setup, development, and maintenance tasks."
+---
+
+# Guides
+
+The guides in this section cover the practical workflows you'll reach for after the initial setup. They show you how to protect specific route groups with wildcards, combine multiple options into a production-ready configuration, and diagnose problems when bot detection doesn't behave as expected.
+
+## Protecting specific routes
+
+When `protectedEndpoints` is omitted, every `POST` and `GET` request is checked. Passing an array narrows protection to only the paths you list. Exact path strings and `*` wildcards are both supported.
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  plugins: [
+    IsBot({
+      protectedEndpoints: [
+        "/auth/*",        // covers /auth/login, /auth/register, etc.
+        "/admin/*",       // covers all admin routes
+        "/api/private/*"  // covers private API routes
+      ]
+    })
+  ],
+});
+```
+
+Any path not matched by the list is left unprotected, so public endpoints like `/health` or `/api/public/*` are never checked.
+
+## Custom error messages
+
+The default blocked response includes `"BOT_DETECTED"` as the message. You can replace it with any string that suits your application:
+
+```ts
+export const auth = betterAuth({
+  plugins: [
+    IsBot({
+      errorMessage: "This endpoint does not allow automated requests. Please use a regular browser."
+    })
+  ],
+});
+```
+
+The `error` field in the response body is always `"BAD_REQUEST"` regardless of the message you set.
+
+## Complete configuration example
+
+Here is a production-ready configuration combining route scoping and a custom error message:
+
+```ts
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      protectedEndpoints: [
+        "/auth/*",
+        "/admin/*",
+        "/api/protected/*"
+      ],
+      errorMessage: "This endpoint does not allow automated requests. Please use a regular browser."
+    })
+  ],
+});
+```
+
+## Response format
+
+When the plugin blocks a request, it returns a `400 Bad Request` with a JSON body:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+If you set a custom `errorMessage`, the `message` field reflects your value. The HTTP status code is always `400`.
+
+> **Note:** Only `POST` and `GET` requests are checked. `PUT`, `PATCH`, `DELETE`, and other methods pass through without a bot check regardless of configuration.
+
+If you run into unexpected behavior, see [Troubleshooting](/docs/guides/troubleshooting) for common issues and fixes.

@@ -1,0 +1,80 @@
+---
+title: "Quickstart"
+description: "Run better-auth-is-bot for the first time."
+---
+
+# Quickstart
+
+This guide takes you from a fresh install to a fully working bot-protection setup. By the end, bots are blocked on your auth routes and you understand how to tune the behavior for your application.
+
+## 1. Install the package
+
+```bash
+pnpm add better-auth-is-bot
+```
+
+## 2. Protect all routes (default)
+
+Add `IsBot()` to your better-auth `plugins` array. No options are required.
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot()
+  ],
+});
+```
+
+Every `POST` and `GET` request to your auth handler is now checked against the `isbot` database. Search engine crawlers, social media bots, monitoring tools, and other automated user agents are blocked before they reach your auth logic.
+
+## 3. Scope protection to specific routes
+
+If you only want to protect a subset of endpoints, pass a `protectedEndpoints` array. Wildcards are supported.
+
+```ts
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"]
+    })
+  ],
+});
+```
+
+Requests to any path not in `protectedEndpoints` pass through without a bot check.
+
+## 4. Customize the error message
+
+By default, blocked bots receive `"BOT_DETECTED"` as the message. You can replace it:
+
+```ts
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      errorMessage: "Automated requests are not permitted."
+    })
+  ],
+});
+```
+
+The response shape stays the same — only the `message` field changes:
+
+```json
+{
+  "message": "Automated requests are not permitted.",
+  "error": "BAD_REQUEST"
+}
+```
+
+## Next steps
+
+For a complete configuration example with wildcards and a custom message together, see the [Guides](/docs/guides) section. If something isn't working as expected, the [Troubleshooting](/docs/guides/troubleshooting) page covers the most common issues.

@@ -1,0 +1,70 @@
+---
+title: "Installation"
+description: "Install and configure better-auth-is-bot."
+---
+
+# Installation
+
+This page walks you through adding `better-auth-is-bot` to an existing [better-auth](https://better-auth.com) project.
+
+## Prerequisites
+
+You need a working better-auth setup before adding this plugin. The plugin does not replace or configure better-auth itself — it extends it.
+
+## Install the package
+
+Pick the package manager you're already using:
+
+```bash
+npm install better-auth-is-bot
+```
+
+```bash
+pnpm add better-auth-is-bot
+```
+
+```bash
+yarn add better-auth-is-bot
+```
+
+## Add the plugin to better-auth
+
+Import `IsBot` from the package and add it to the `plugins` array in your better-auth configuration:
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  // ... your existing better-auth configuration
+  plugins: [
+    IsBot()
+  ],
+});
+```
+
+That's all that's required. With no options passed, the plugin protects every `POST` and `GET` route from bot traffic automatically.
+
+## Verify the setup
+
+Start your development server and make a request with a known bot `User-Agent`, such as Googlebot:
+
+```bash
+curl -H "User-Agent: Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" \
+  -X POST http://localhost:3000/api/auth/sign-in
+```
+
+You should receive a `400 Bad Request` response with the following body:
+
+```json
+{
+  "message": "BOT_DETECTED",
+  "error": "BAD_REQUEST"
+}
+```
+
+A normal browser `User-Agent` will pass through without any change to your existing auth flow.
+
+## Next steps
+
+Once the plugin is installed, head to the [Quickstart](/docs/quickstart) to explore configuration options, or read the [Guides](/docs/guides) for route-specific protection patterns.
