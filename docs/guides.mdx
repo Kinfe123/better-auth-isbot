@@ -1,0 +1,68 @@
+---
+title: "Guides"
+description: "Practical runbooks for common setup, development, and maintenance tasks."
+---
+
+# Guides
+
+These guides walk through real configuration workflows for `better-auth-is-bot`. Each one is task-focused: you start with a goal and end with a working, verifiable result.
+
+## Protecting specific routes
+
+By default `IsBot()` guards every `POST` and `GET` request. When you only want to protect a subset — say, your sign-in and registration flows — pass a `protectedEndpoints` array:
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  plugins: [
+    IsBot({
+      protectedEndpoints: ["/sign-in", "/sign-up", "/reset-password"]
+    })
+  ],
+});
+```
+
+Routes not listed in `protectedEndpoints` are left untouched, even for known bot agents.
+
+## Using wildcard patterns
+
+Wildcards let you cover entire route groups with a single entry. The `*` character matches any path segment after the prefix:
+
+```ts
+IsBot({
+  protectedEndpoints: [
+    "/auth/*",         // covers /auth/login, /auth/callback, etc.
+    "/admin/*",        // covers all admin routes
+    "/api/private/*"   // covers your private API surface
+  ]
+})
+```
+
+This is the recommended approach when your auth layer handles many sub-routes under a common prefix.
+
+## Custom error messages
+
+The default blocked response carries the message `"BOT_DETECTED"`. You can replace it with something more descriptive:
+
+```ts
+IsBot({
+  errorMessage: "This endpoint does not allow automated requests. Please use a regular browser."
+})
+```
+
+The full response shape is always:
+
+```json
+{
+  "message": "<your message or BOT_DETECTED>",
+  "error": "BAD_REQUEST"
+}
+```
+
+The HTTP status code is always `400`.
+
+## Next steps
+
+If something isn't behaving as expected, the [Troubleshooting](/docs/guides/troubleshooting) page covers the most common issues and how to resolve them.

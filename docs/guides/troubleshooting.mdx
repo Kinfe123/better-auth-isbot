@@ -1,0 +1,75 @@
+---
+title: "Troubleshooting"
+description: "Common setup and runtime issues are documented as clear recovery paths."
+---
+
+# Troubleshooting
+
+This page covers the issues most likely to come up when adding or running `better-auth-is-bot`, and how to resolve each one.
+
+## The plugin doesn't block any bots
+
+The most common cause is that the plugin was not added to the `plugins` array, or the import is wrong. Verify your config looks like this:
+
+```ts
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  plugins: [IsBot()],
+});
+```
+
+Note that `IsBot` must be called as a function — `IsBot()`, not `IsBot`.
+
+## Legitimate users are being blocked
+
+Some browsers, proxies, or automation tools send `User-Agent` strings that `isbot` classifies as bots. If you see real users affected, narrow protection to only the routes that need it:
+
+```ts
+IsBot({
+  protectedEndpoints: ["/sign-in", "/sign-up"]
+})
+```
+
+This ensures that unprotected routes — such as static asset requests or public API endpoints — are never blocked, regardless of the user agent.
+
+## Only POST and GET requests are filtered
+
+The plugin intentionally ignores all HTTP methods other than `POST` and `GET`. If you're testing with `PUT`, `PATCH`, `DELETE`, or `OPTIONS`, those requests will pass through without any bot check — this is expected behavior.
+
+## A route isn't being protected despite being in `protectedEndpoints`
+
+Check that the path string you're matching starts with `/` and exactly matches the path segment your server receives — query strings are not included in matching. For route groups, use a wildcard:
+
+```ts
+IsBot({
+  protectedEndpoints: ["/api/auth/*"] // matches /api/auth/sign-in, /api/auth/callback, etc.
+})
+```
+
+> **Note:** The wildcard `*` matches everything after the prefix. A pattern like `/api/auth/*` does **not** match `/api/auth` itself (no trailing segment). Add `/api/auth` as a separate entry if you also need to protect the bare path.
+
+## The error message in the response is not what I set
+
+Confirm you're passing `errorMessage` inside the options object, not as a second argument:
+
+```ts
+// Correct
+IsBot({ errorMessage: "No bots allowed." })
+
+// Incorrect — second argument is ignored
+IsBot({}, "No bots allowed.")
+```
+
+## Verifying detection with curl
+
+You can quickly confirm the plugin is active by sending a request with a Googlebot user agent:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/sign-in \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Googlebot/2.1 (+http://www.google.com/bot.html)" \
+  -d '{"email":"test@example.com","password":"password"}'
+```
+
+A `400` response with `"error": "BAD_REQUEST"` confirms the plugin is intercepting bot requests correctly.

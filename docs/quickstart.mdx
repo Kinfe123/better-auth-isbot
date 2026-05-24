@@ -1,0 +1,91 @@
+---
+title: "Quickstart"
+description: "Run better-auth-is-bot for the first time."
+---
+
+# Quickstart
+
+This page shows you the fastest path from install to a bot-protected auth setup. By the end you'll have the plugin running and understand the two configuration options available to you.
+
+## 1. Install
+
+```bash
+pnpm add better-auth-is-bot
+```
+
+## 2. Add the plugin
+
+The zero-config default protects every `POST` and `GET` route your `better-auth` instance handles:
+
+```ts
+import { betterAuth } from "better-auth";
+import { IsBot } from "better-auth-is-bot";
+
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot()
+  ],
+});
+```
+
+Any request carrying a bot `User-Agent` now gets a `400` before it touches your handlers.
+
+## 3. Protect specific routes only
+
+If you'd rather limit protection to a subset of routes, pass a `protectedEndpoints` array. Wildcard patterns are supported:
+
+```ts
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      protectedEndpoints: ["/sign-in", "/sign-up", "/api/auth/*"]
+    })
+  ],
+});
+```
+
+Routes not listed here are left unguarded regardless of the `User-Agent`.
+
+## 4. Customise the error message
+
+Override the default `"BOT_DETECTED"` message with anything meaningful to your application:
+
+```ts
+export const auth = betterAuth({
+  baseURL: "http://localhost:3000",
+  database: /* your database config */,
+  plugins: [
+    IsBot({
+      errorMessage: "Automated requests are not permitted on this endpoint."
+    })
+  ],
+});
+```
+
+Blocked requests will receive:
+
+```json
+{
+  "message": "Automated requests are not permitted on this endpoint.",
+  "error": "BAD_REQUEST"
+}
+```
+
+`IsBot` accepts a single optional `IsBotOptions` object:
+
+```ts
+export interface IsBotOptions {
+  protectedEndpoints?: string[]; // defaults to all routes
+  errorMessage?: string;         // defaults to "BOT_DETECTED"
+}
+```
+
+Both fields are optional. Omit the argument entirely to use the defaults.
+
+## Next steps
+
+Explore more patterns in the [Guides](/docs/guides), or check the [Troubleshooting](/docs/guides/troubleshooting) page if something isn't behaving as expected.
